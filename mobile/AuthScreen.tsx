@@ -34,7 +34,7 @@ export default function AuthScreen() {
   const googleSignIn = async () => {
     if (!supabase) return;
     setBusy(true); setError('');
-    const redirectTo = Linking.createURL('/auth/callback');
+    const redirectTo = Linking.createURL('auth/callback');
     const { data, error: oauthError } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo, skipBrowserRedirect: true } });
     if (oauthError || !data.url) { setBusy(false); setError(oauthError?.message || 'Google sign-in could not start.'); return; }
     const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
