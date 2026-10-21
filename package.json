@@ -1,0 +1,12 @@
+{
+  "name": "paisa-pilot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mobile-first personal spending analyzer starter",
+  "scripts": {
+    "start": "npm run start --workspace mobile",
+    "start:api": "npm run dev --workspace api",
+    "db:setup": "npm run db:setup --workspace api"
+  },
+  "workspaces": ["mobile", "api"]
+}

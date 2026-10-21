@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Paisa Pilot",
+    "slug": "paisa-pilot",
+    "version": "1.0.0",
+    "scheme": "paisapilot",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "platforms": [
+      "android",
+      "web"
+    ],
+    "android": {
+      "package": "com.paisapilot.app"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "./plugins/withAndroidTransactionCapture"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0627250b-49c7-4450-8191-121d30af8987"
+      }
+    },
+    "owner": "kshitijabhinandan"
+  }
+}

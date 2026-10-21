@@ -1,0 +1,10 @@
+node_modules/
+mobile/.env
+api/.env
+.expo/
+dist/
+build/
+coverage/
+api/.env
+*.log
+.DS_Store
