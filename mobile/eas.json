@@ -6,8 +6,15 @@
     "preview": {
       "distribution": "internal",
       "environment": "preview",
+      "autoIncrement": true,
       "android": {
         "buildType": "apk"
+      }
+    },
+    "preview-ios-simulator": {
+      "extends": "preview",
+      "ios": {
+        "simulator": true
       }
     },
     "production": {

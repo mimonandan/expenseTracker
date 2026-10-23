@@ -2,19 +2,44 @@
   "expo": {
     "name": "Paisa Pilot",
     "slug": "paisa-pilot",
+    "icon": "./assets/paisa-pilot-icon-cap.png",
+    "splash": {
+      "image": "./assets/paisa-pilot-icon-cap.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#E8F5EC"
+    },
     "version": "1.0.0",
     "scheme": "paisapilot",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "platforms": [
       "android",
+      "ios",
       "web"
     ],
+    "web": {
+      "favicon": "./assets/paisa-pilot-icon-cap.png"
+    },
     "android": {
-      "package": "com.paisapilot.app"
+      "package": "com.paisapilot.app",
+      "icon": "./assets/paisa-pilot-icon-cap.png"
+    },
+    "ios": {
+      "bundleIdentifier": "com.paisapilot.app",
+      "icon": "./assets/paisa-pilot-icon-cap.png",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "plugins": [
       "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "defaultChannel": "daily-spending",
+          "color": "#176B52"
+        }
+      ],
       "./plugins/withAndroidTransactionCapture"
     ],
     "extra": {

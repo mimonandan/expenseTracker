@@ -1,7 +1,9 @@
 node_modules/
+.npm-cache/
 mobile/.env
 api/.env
 .expo/
+supabase/.temp/
 dist/
 build/
 coverage/

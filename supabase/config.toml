@@ -1,0 +1,5 @@
+[functions.spending-api]
+# The function validates each user's access token with Supabase Auth itself.
+# Disable the legacy gateway check so it does not reject modern publishable-key
+# clients or signing-key JWTs before the handler can perform that validation.
+verify_jwt = false

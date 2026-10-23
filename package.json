@@ -6,7 +6,8 @@
   "scripts": {
     "start": "npm run start --workspace mobile",
     "start:api": "npm run dev --workspace api",
-    "db:setup": "npm run db:setup --workspace api"
+    "db:setup": "npm run db:setup --workspace api",
+    "test": "node --experimental-strip-types --test"
   },
   "workspaces": ["mobile", "api"]
 }
