@@ -14,5 +14,5 @@ const sessionStorage = Platform.OS === 'web' ? AsyncStorage : {
 };
 
 export const supabase = authConfigured ? createClient(url, key, {
-  auth: { storage: sessionStorage, autoRefreshToken: true, persistSession: true, detectSessionInUrl: false },
+  auth: { flowType: 'pkce', storage: sessionStorage, autoRefreshToken: true, persistSession: true, detectSessionInUrl: Platform.OS === 'web' },
 }) : null;

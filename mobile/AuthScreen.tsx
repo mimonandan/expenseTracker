@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { authConfigured, supabase } from './lib/supabase';
@@ -12,13 +12,37 @@ export default function AuthScreen() {
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const processedAuthCodes = useRef(new Set<string>());
+
+  const exchangeAuthCode = async (url: string) => {
+    if (!supabase) return;
+    const code = Linking.parse(url).queryParams?.code;
+    if (typeof code !== 'string' || !code || processedAuthCodes.current.has(code)) return;
+    processedAuthCodes.current.add(code);
+    setBusy(true); setError('');
+    try {
+      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+      if (exchangeError) setError(exchangeError.message);
+    } catch (authError) {
+      setError(authError instanceof Error ? authError.message : 'Sign-in could not be completed. Please try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!supabase || Platform.OS === 'web') return;
+    const subscription = Linking.addEventListener('url', ({ url }) => { void exchangeAuthCode(url); });
+    void Linking.getInitialURL().then((url) => { if (url) return exchangeAuthCode(url); });
+    return () => subscription.remove();
+  }, []);
 
   const sendOtp = async () => {
     if (!supabase) return;
     const normalized = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) { setError('Enter a valid email address.'); return; }
     setBusy(true); setError('');
-    const { error: requestError } = await supabase.auth.signInWithOtp({ email: normalized, options: { shouldCreateUser: true } });
+    const { error: requestError } = await supabase.auth.signInWithOtp({ email: normalized, options: { shouldCreateUser: true, emailRedirectTo: Linking.createURL('auth/callback') } });
     setBusy(false);
     if (requestError) setError(requestError.message); else { setEmail(normalized); setSent(true); }
   };
@@ -34,15 +58,26 @@ export default function AuthScreen() {
   const googleSignIn = async () => {
     if (!supabase) return;
     setBusy(true); setError('');
-    const redirectTo = Linking.createURL('auth/callback');
-    const { data, error: oauthError } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo, skipBrowserRedirect: true } });
-    if (oauthError || !data.url) { setBusy(false); setError(oauthError?.message || 'Google sign-in could not start.'); return; }
-    const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
-    if (result.type === 'success' && result.url) {
-      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(result.url);
-      if (exchangeError) setError(exchangeError.message);
+    try {
+      const redirectTo = Linking.createURL('auth/callback');
+      if (Platform.OS === 'web') {
+        const { error: oauthError } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
+        if (oauthError) setError(oauthError.message);
+        return;
+      }
+      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo, skipBrowserRedirect: true } });
+      if (oauthError || !data.url) { setError(oauthError?.message || 'Google sign-in could not start.'); return; }
+      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+      if (result.type === 'success' && result.url) {
+        const code = Linking.parse(result.url).queryParams?.code;
+        if (typeof code !== 'string' || !code) { setError('Google sign-in did not return an authorization code. Please try again.'); return; }
+        await exchangeAuthCode(result.url);
+      }
+    } catch (oauthError) {
+      setError(oauthError instanceof Error ? oauthError.message : 'Google sign-in failed. Please try again.');
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
   };
 
   return <SafeAreaView style={styles.safe}><View style={styles.card}>
